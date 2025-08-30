@@ -1,0 +1,9 @@
+things to do:
+  - fix the error in server(maybe change to constant connection)
+  - add users tab to ui
+  - make it so when getting a message it shows in the gui in the correct chat
+  - make it so sending a massage it actually sends
+  - add starting screen to enter username and check if it already exists in the network
+  - add global message feature
+  - add encryption to messages?
+  - add file transfer feature?
