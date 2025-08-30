@@ -31,14 +31,15 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Printf("Server: Received: %s", message)
-		if string(message) == "ping" {
-			err = ws.WriteMessage(messageType, []byte(util.UserName))
+		if messageType == websocket.TextMessage {
+			err = ws.WriteMessage(websocket.PongMessage, []byte(util.UserName))
 			if err != nil {
 				log.Printf("Server: Error writing pong message: %v", err)
 				break
 			}
 			continue
 		}
+		//TODO: implement adding text massages to the text area
 		err = ws.WriteMessage(messageType, []byte("Echo: "+string(message)))
 		if err != nil {
 			log.Printf("Server: Error writing message: %v", err)
@@ -49,8 +50,6 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 
 func StartWebSocketServer() {
 	http.HandleFunc("/ws", handleConnections)
-
-	// Start the HTTP server and listen for connections on port 8080
 	log.Printf("WebSocket server starting on :%v\n", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 	if err != nil {

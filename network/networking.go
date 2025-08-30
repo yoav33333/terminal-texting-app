@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 	"textEditor/util"
+	"time"
 )
 
 const port = 3000
@@ -15,7 +16,7 @@ const port = 3000
 func ping(ip string) (bool, string) {
 	u := url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%v", ip, port), Path: "/ws"}
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	defer c.Close()
+	//defer c.Close()
 
 	if err != nil {
 		log.Fatal("dial:", err)
@@ -25,6 +26,7 @@ func ping(ip string) (bool, string) {
 		return false, ""
 	}
 	_, message, err := c.ReadMessage()
+	c.Close()
 	if err != nil {
 		return false, ""
 	}
@@ -40,17 +42,30 @@ func findDevicesInNetwork() []string {
 	}
 	return ips
 }
+func checkIfNameExists(name string) bool {
+	for _, user := range util.Users {
+		if user == name {
+			return true
+		}
+	}
+	return false
+}
 
 func RunNetworkingShit() {
 	go StartWebSocketServer()
-	ips := findDevicesInNetwork()
-	for _, ip := range ips {
-		active, userName := ping(ip)
-		if active {
-			println("Client: Found WebSocket server at:", ip)
-			util.Users[ip] = userName
-			println("Users:", util.Users)
+	for {
+		ips := findDevicesInNetwork()
+		util.Users = make(map[string]string)
+		for _, ip := range ips {
+			active, userName := ping(ip)
+			if active && !checkIfNameExists(userName) {
+				println("Client: Found WebSocket server at:", ip)
+				util.Users[ip] = userName
+			}
 		}
+		for ip, user := range util.Users {
+			println("Client: User", user, "is at", ip)
+		}
+		time.Sleep(5 * time.Second)
 	}
-
 }
