@@ -1,0 +1,2 @@
+This message will be written to output.txt
+And so will this one.
